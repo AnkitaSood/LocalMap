@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Local Map</title>
+  <link href="css/styles.css" rel="stylesheet" >
+  <link href="css/jquery-ui.min.css" rel="stylesheet" >
+</head>
+<body data-bind="style: {background: 0}">
+  <h1 style="display: block;" data-bind="visible: false">Looking for something? Enable your location detection and view nearby places!</h1>
+  <section class="local-map-filter pull-above" style="display: none;" data-bind="visible: true">
+    <div class="flexbox-container">
+      <div id="menu-icon" class="menu-icon" data-bind="click: toggleResults, css : {'open' : showResults}">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <input type="text" id="search" class="venue-search" placeholder="Enter name of venue"/>
+    </div>
+    <div class="venue-name-error" data-bind="visible: venueSuggestions"> No such venue name found near you.</div>
+    <div class="category-filter dark-text">
+      <h4> Choose a category to refine results:</h4>
+      <ul class="categories flexbox-container" data-bind="foreach: category">
+        <li class="category" data-bind="text: name, click:$parent.filterList.bind($data, name, key), css: {'active' : key === $parent.selectedCatKey()}"></li>
+      </ul>
+    </div>
+    <div class="venue-results dark-text" data-bind="foreach: {data: venues, as: 'venue'}, visible: showResults">
+      <div class="venue" data-bind="css: {active : venue.displayDetails}">
+        <h3 data-bind="text: name, click:$parent.displayVenueDetails.bind($data, location.postalCode)"></h3>
+        <div class="venue-details" data-bind="visible: venue.displayDetails">
+          <p class="address">
+            Address: <span data-bind="text: location.address"></span>
+          </p>
+          <p class="distance">Distance from current location:
+            <span data-bind="text: location.distance"></span> meters.
+          </p>
+
+            <div class="venue-weather">
+            <p>Current Weather:
+              <img class="venue-weather-icon" data-bind="attr:{src : venue.weatherIcon}"></img>
+              <span class="venue-weather-desc" data-bind="text: venue.currWeather"></span>
+            </p>
+            <p>Current Temperature:
+              <span class="venue-weather-temp" data-bind="text: venue.currTemp"></span> &deg;C
+            </p>
+            <p>Current Wind Speed:
+              <span class="venue-weather-winds" data-bind="text: venue.currWind"></span>  meter/sec
+            </p>
+          </div>
+          <div data-bind="foreach: { data: categories, as: 'category' }">
+            Sub-Category: <span class="venue-sub-category" data-bind="text:category.pluralName"></span>
+          </div>
+          <!-- ko if: $data.hasOwnProperty("url") -->
+          <a  class="venue-website-url" href="#" target="_blank" data-bind="attr: { href: url, title: name }">
+            Visit <span data-bind="text: name"></span>'s Website
+          </a>
+           <!-- /ko -->
+        </div>
+      </div>
+    </div>
+  </section>
+  <div id="map-canvas"></div>
+<script src="js/categories.json" type="text/javascript"></script>
+<script src="js/main.min.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB3ghOyAcsI4ZC02gy8Vw76aVqSQykJJ8I&callback=localMapApp.initMap&libraries=places" async defer></script>
+  <script type="text/javascript">
+  WebFontConfig = {
+    google: { families: [ 'Inconsolata::latin' ] }
+  };
+  (function() {
+    var wf = document.createElement('script');
+    wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+    wf.type = 'text/javascript';
+    wf.async = 'true';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(wf, s);
+  })(); </script>
+</body>
+</html>
