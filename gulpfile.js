@@ -2,7 +2,8 @@ var gulp = require('gulp'),
     uglify = require('gulp-uglify'),
     imagemin = require('gulp-imagemin'),
     htmlmin = require('gulp-htmlmin'),
-    cleanCSS = require('gulp-clean-css');
+    cleanCSS = require('gulp-clean-css'),
+    ghPages = require('gulp-gh-pages');
 
 var browserSync = require('browser-sync').create(),
     reload = browserSync.reload;
@@ -55,3 +56,8 @@ gulp.task('browser-sync', function() {
 });
 
 gulp.task('default', ['jsmin','img-compress', 'cssmin','htmlmin']);
+
+gulp.task('deploy', function() {
+  return gulp.src('./dist/**/*')
+    .pipe(ghPages());
+});
