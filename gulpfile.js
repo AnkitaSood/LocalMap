@@ -58,6 +58,6 @@ gulp.task('browser-sync', function() {
 gulp.task('default', ['jsmin','img-compress', 'cssmin','htmlmin']);
 
 gulp.task('deploy', function() {
-  return gulp.src('./dist/**/*')
+  return gulp.src('./app/**/*')
     .pipe(ghPages());
 });
