@@ -5,5 +5,19 @@ Click [here](http://ankitasood.github.io/LocalMap) to view the project live!
 
 ---
 
+####Build the project on your local using the following steps:
+- Download the repository on your local machine.
+- Use command line to install `gulp` & other dependencies as mentioned in `package.json`, and then build the project by running the `gulp` task.
+- Host the 'app' folder using a local server. Allow the website the access location and navigate as desired for the complete experience.
+
+
+---
+
+####Attributions:
+- (Google Maps API) [https://developers.google.com/maps/], along with the places library to retrieve location images.
+- (Open Weather Map API)[http://openweathermap.org/api] for weather information.
+- (Hamburger menu animation)[http://codepen.io/dalton/pen/YXZGry].
+- (Foursquare API)[https://developer.foursquare.com/], to retrieve list of nearby locations based on user's current location.
+
 
 
