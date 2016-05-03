@@ -18,7 +18,7 @@ var localMapApp = (function () {
                 disableDefaultUI: true,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             });
-            /*Applying bindings and load data once position has been retrieved*/
+            // Applying bindings and load data once position has been retrieved
             google.maps.event.addListenerOnce(localMapApp.map, 'idle', function () {
                 ko.applyBindings(viewModel);
                 viewModel.fetchVenues();
@@ -47,11 +47,18 @@ var localMapApp = (function () {
             alert('Sorry, browser does not support geolocation!');
         }
     };
+    var googleError = function() {
+        alert("Sorry, Google maps failed to load. Please try again later.")
+    };
     return {
-        initMap: initMap
-    }
+        initMap: initMap,
+        googleError: googleError
+    };
 })();
 var Venue = function (venue) {
+    venue.fqUrl = ko.computed(function() {
+       return "https://foursquare.com/v/"+venue.id;
+    });
     venue.currWeather = ko.observable();
     venue.currTemp = ko.observable();
     venue.currWind = ko.observable();
@@ -67,7 +74,8 @@ var Venue = function (venue) {
     venue.infowindow = new google.maps.InfoWindow({
         maxWidth: 300
     });
-}
+};
+
 var viewModel = new function () {
     var self = this;
     self.category = ko.observableArray(CATEGORIES);
@@ -80,7 +88,7 @@ var viewModel = new function () {
     self.markersArr = ko.observableArray([]);
     self.toggleResults = function (data, event) {
         self.showResults(!self.showResults());
-    }
+    };
     self.filterList = function (selectedCatName, selectedCatKey) {
         if (selectedCatName === 'All') {
             self.limit = ko.observable(25);
@@ -90,7 +98,7 @@ var viewModel = new function () {
         self.fetchVenues(selectedCatKey);
     };
     self.resetMarkers = function () {
-        /*Reset markers for every search*/
+        // Reset markers for every search
         if (self.markersArr().length !== 0) {
             $.each(self.markersArr(), function (i, marker) {
                 marker.setMap(null);
@@ -105,15 +113,15 @@ var viewModel = new function () {
             infowindow,
             service = new google.maps.places.PlacesService(localMapApp.map),
             request, venueImgUrl;
-        /* Display venues from all categories, on page load */
+        // Display venues from all categories, on page load
         if (selectedCatKey === undefined) {
             selectedCatKey = '';
             $.each(self.category(), function (i, category) {
                 selectedCatKey += category.key + ',';
             });
-            //Remove the last comma that gets appended while concatenating the keys
+            // Remove the last comma that gets appended while concatenating the keys
             selectedCatKey = selectedCatKey.slice(0, -1);
-        };
+        }
         self.selectedCatKey(selectedCatKey);
         $.getJSON({
             url: encodeURI('https://api.foursquare.com/v2/venues/search?ll=' + latlong + '&categoryId=' + selectedCatKey + '&limit=' + self.limit() + '&intent=browse&radius=8000&client_id=XK2FF2P2QZZSB1HPAFQFC1VEBRUM0AYXKVSB3G14MN3IXMLT&client_secret=S5MD24CPFUC2TXWRSKW1URKHWJ1JAD44E4XMQO5LWWZJHOS5&v=20160419')
@@ -125,12 +133,12 @@ var viewModel = new function () {
             self.venues(venues);
             self.resetMarkers();
             $.each(self.venues(), function (i, venue) {
-                /*Create markers for all venues*/
+                // Create markers for all venues
                 marker = venue.marker;
                 infowindow = venue.infowindow;
                 self.markersArr.push(marker);
                 bounds.extend(marker.position);
-                /*Fetch venue image to display inside infowindow of each marker & append to marker content */
+                // Fetch venue image to display inside infowindow of each marker & append to marker content
                 var makeInfoWindow = function (results, status) {
                         markerContentStr = '';
                         if (status == google.maps.places.PlacesServiceStatus.OK && results[0].photos !== undefined) {
@@ -143,14 +151,17 @@ var viewModel = new function () {
                         }
                         markerContentStr = '<div id="markerContent">' + '<img src=' + venueImgUrl + ' alt="Venue Image"/>' + '<h5>' + venue.name + '</h5>' + '<p>Category: ' + venue.categories[0].name + '</p>';
                         infowindow.setContent(markerContentStr);
-                    }
-                    /*Request to fetch venue image*/
+                };
+                // Request to fetch venue image
                 request = {
                     location: venue.position,
                     radius: '100',
                     keyword: venue.name
                 };
-                /*On click of marker - toggle marker, call makeInfoWindow and display infowindow content*/
+                /* On click of marker -
+                    toggle marker,
+                    call makeInfoWindow
+                    and display infowindow content*/
                 var markerMagic = function (request, makeInfoWindow, marker) {
                     return function () {
                         service.nearbySearch(request, makeInfoWindow);
@@ -162,60 +173,74 @@ var viewModel = new function () {
                             self.displayVenueDetails(venue.location.postalCode, venue);
                         };
                         infowindow.open(localMapApp.map, marker);
-                    }
-                }
+                    };
+                };
                 google.maps.event.addListener(marker, 'click', markerMagic(request, makeInfoWindow, marker));
                 google.maps.event.addListener(infowindow, 'closeclick', function () {
                     currMarker.setAnimation(null);
                 });
             });
-            //Create list of venues to be shown as autosuggest for search textbox
+            // Create list of venues to be shown as autosuggest for search textbox
             self.venuesList($.map(self.venues(), function (venue) {
                 return {
                     label: venue.name,
                     id: venue.id
-                }
+                };
             }));
-
             $('.venue-search').autocomplete({
                 source: self.venuesList(),
                 autoFocus: true,
-                minLength: 2,
+                minLength: 0,
                 select: function (event, ui) {
-                    self.venues(venues);
-                    //self.resetMarkers();
                     $.each(self.venues(), function (i, venue) {
                         if (venue.id === ui.item.id) {
                             self.venues(venue);
-                            marker = venue.marker;
-                            infowindow = venue.infowindow;
-                            self.markersArr.push(marker);
+                            venue.marker.setVisible(true);
                             bounds.extend(marker.position);
                             localMapApp.map.setCenter(marker.position);
                             self.displayVenueDetails(venue.location.postalCode, venue);
                             self.showResults(true);
                             return false;
                         }
-                    })
+                    });
                 },
                 response: function (event, ui) {
                     if (ui.content.length === 0) {
+                        // no results found!
                         self.venueSuggestions(true);
                     } else {
                         self.venueSuggestions(false);
+                        self.venues(venues);
+                        var searchQuery, matchedVenues = [];
+                        $.each(self.venues(), function (i, venue) {
+                            // Hide all markers by default
+                            venue.marker.setVisible(false);
+                            $.each(ui.content, function (j, searchQuery) {
+                                if (venue.name.indexOf(searchQuery.label) > -1) {
+                                    // Save matched venue
+                                    matchedVenues.push(venue);
+                                    // Display matched venue marker
+                                    venue.marker.setVisible(true);
+                                    return false;
+                                }
+                            });
+                        });
+                        // Display only matched results
+                        self.venues(matchedVenues);
                     }
                 }
             });
             localMapApp.map.fitBounds(bounds);
+        }).fail(function () {
+            alert("Unable to retrieve any results for your location. Please try after some time.");
         });
     };
-
     self.displayVenueDetails = function (zipcode, sender) {
-        /*Toggle venue details when selected*/
+        // Toggle venue details when selected
         sender.displayDetails(!sender.displayDetails());
         if (sender.displayDetails()) {
             google.maps.event.trigger(sender.marker, 'click');
-            /*Fetch venue weather details*/
+            // Fetch venue weather details
             $.getJSON({
                 url: encodeURI('http://api.openweathermap.org/data/2.5/weather?zip=' + zipcode + '&APPID=3ba479c50b70ef8527458684a4df9608&units=metric')
             }).done(function (data) {
@@ -227,6 +252,9 @@ var viewModel = new function () {
                 sender.currTemp(data.main.temp);
                 sender.currWind(data.wind.speed);
                 sender.weatherIcon('http://openweathermap.org/img/w/' + data.weather[0].icon + '.png');
+            }).fail(function() {
+                // Hide weather details section in case there's an error in fetching data
+                $(".venue-weather").hide();
             });
         }
     };

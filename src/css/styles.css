@@ -116,7 +116,7 @@ h1 {
     font-style: italic;
 }
 
-.venue-website-url {
+a[class^="venue-url-"] {
     text-decoration: none;
     color: #d84315;
     font-weight: 700;
