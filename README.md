@@ -13,6 +13,12 @@ Click [here](http://ankitasood.github.io/LocalMap) to view the project live!
 
 
 ---
+#### To-Dos:
+- Cache the JSON responses in localstorage so that the data isn't everytime the user changes the filter.
+- Cache weather information for about 15-20 minutes so a new request isn't fired everytime the user views a location's details.
+ 
+
+---
 
 ####Attributions:
 - (Google Maps API) [https://developers.google.com/maps/], along with the places library to retrieve location images.
