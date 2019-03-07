@@ -21,7 +21,7 @@ Click [here](http://ankitasood.github.io/LocalMap) to view the project live!
 ---
 
 ####Attributions:
-- [Google Maps API] (https://developers.google.com/maps/), along with the places library to retrieve location images.
+- [Google Maps API](https://developers.google.com/maps/), along with the places library to retrieve location images.
 - [Open Weather Map API](http://openweathermap.org/api) for weather information.
 - [Hamburger menu animation](http://codepen.io/dalton/pen/YXZGry).
 - [Foursquare AP](https://developer.foursquare.com/), to retrieve list of nearby locations based on user's current location.
